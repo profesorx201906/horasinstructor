@@ -20,7 +20,7 @@ const InstructorCard = ({ instructorName, data }) => {
     // aquí solo usamos los valores calculados: item.horasProyectadas
     
     const limitedHorasEjecutadas = (tipoContrato === 'Contrato' && item.horasEjecutadas > 160) 
-      ? 160 
+      ? item.horasEjecutadas 
       : item.horasEjecutadas;
 
     return {

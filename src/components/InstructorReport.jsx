@@ -50,6 +50,10 @@ const calculateHours = (data) => {
             } else {
                 // Lógica anterior para Contrato (8 horas * Días Hábiles)
                 horasProyectadas = (8 * DIAS_HABILES);
+                                
+                if (horasProyectadas > 160) {
+                    horasProyectadas = 160
+                }
                 if (OTRAS_HORAS > 0) {
                     tieneOtrasHorasContrato = true;
                 }

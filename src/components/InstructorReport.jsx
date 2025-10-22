@@ -183,9 +183,9 @@ const InstructorReport = ({ data }) => {
                     🌎 Resumen {isGlobal ? 'Global' : `para ${selectedCargo}`} de Horas
                 </h2>
                 <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '20px', fontWeight: 'bold', fontSize: '1.1em' }}>
-                    <span>Total Proyectado: **{totalProyectado.toFixed(1)}** hrs</span>
-                    <span>Total Ejecutado: **{totalEjecutado.toFixed(1)}** hrs</span>
-                    <span style={{ color: totalDiferencia < 0 ? 'red' : 'green' }}>Diferencia Total: **{totalDiferencia.toFixed(1)}** hrs</span>
+                    <span>Total Proyectado: {totalProyectado.toFixed(1)} hrs</span>
+                    <span>Total Ejecutado: {totalEjecutado.toFixed(1)} hrs</span>
+                    <span style={{ color: totalDiferencia < 0 ? 'red' : 'green' }}>Diferencia Total: {totalDiferencia.toFixed(1)} hrs</span>
                 </div>
 
                 <div style={{ display: 'flex', gap: '20px', marginTop: '20px', flexWrap: 'wrap' }}>
@@ -199,7 +199,7 @@ const InstructorReport = ({ data }) => {
                                 <XAxis
                                     dataKey="MES"
                                     angle={0}
-                                    textAnchor="end"
+                                    textAnchor="middle"
                                     interval={0}
                                     height={50}
                                     style={{ fontSize: '0.6em' }}

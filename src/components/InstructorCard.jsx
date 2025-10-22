@@ -93,7 +93,7 @@ const InstructorCard = ({ instructorName, data }) => {
               <XAxis 
                 dataKey="MES" 
                 angle={0} 
-                textAnchor="center" 
+                textAnchor="middle" 
                 interval={0} 
                 height={50} 
                 style={{ fontSize: '0.6em' }} 

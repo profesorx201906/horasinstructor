@@ -212,7 +212,7 @@ const InstructorReport = ({ data }) => {
                                 <Tooltip formatter={(value) => [`${value.toFixed(1)} hrs`]} />
                                 <Legend />
                                 <Bar dataKey="totalProyectado" fill={COLORS[0]} name="Proyectado" />
-                                <Bar dataKey="totalEjecutado" fill={COLORS[1]} name="Ejecutado (con Límite 160h)" />
+                                <Bar dataKey="totalEjecutado" fill={COLORS[1]} name="Ejecutado" />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>

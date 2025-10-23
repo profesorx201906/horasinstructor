@@ -105,7 +105,7 @@ const InstructorCard = ({ instructorName, data }) => {
               <Bar 
                 dataKey="horasEjecutadas" 
                 fill={COLORS[1]} 
-                name={`Ejecutado${tipoContrato === 'Contrato' ? ' (Límite)' : ''}`} 
+                name={`Ejecutado${tipoContrato === 'Contrato' ? ' ' : ''}`} 
               />
             </BarChart>
           </ResponsiveContainer>

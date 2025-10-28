@@ -1,127 +1,81 @@
 // src/components/InstructorCard.jsx
-
 import React from 'react';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 
-// Colores
-const COLORS = ['#0088FE', '#00C49F', '#FF0000', '#009900']; 
+const COLORS = ['#0088FE', '#00C49F', '#FF0000', '#009900'];
 
-const InstructorCard = ({ instructorName, data }) => {
+const InstructorCard = ({ instructorName, data, formatNumber }) => {
+  // Formateador por defecto: punto como miles, 0 decimales
+  const formatNumberWithSeparators = (number) => {
+  // Verificamos si el valor es un número válido
+  if (typeof number !== 'number' || isNaN(number)) {
+    return '0'; // Retorna un valor por defecto si no es un número
+  }
+
+  // Usamos Intl.NumberFormat con la configuración regional de Colombia (es-CO)
+  // 'minimumFractionDigits: 2' asegura que siempre haya al menos dos decimales.
+  return new Intl.NumberFormat('es-CO', { 
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0 // Opcional: limita a dos decimales
+  }).format(number);
+};
+
+
   const monthlyData = data.filter(item => item.NOMBRE_INSTRUCTOR === instructorName);
-  
+
   const tipoContrato = monthlyData.length > 0 ? monthlyData[0].TIPO_CONTRATO : 'N/A';
   const showOtrasHorasWarning = monthlyData.some(item => item.tieneOtrasHorasContrato);
 
-  // 1. Preparar datos y aplicar el LÍMITE de 160 horas (solo a Contrato)
-  const dataWithLimit = monthlyData.map(item => {
-    // La lógica de proyección ahora se maneja completamente en InstructorReport.jsx,
-    // aquí solo usamos los valores calculados: item.horasProyectadas
-    
-    const limitedHorasEjecutadas = (tipoContrato === 'Contrato' && item.horasEjecutadas > 160) 
-      ? item.horasEjecutadas 
-      : item.horasEjecutadas;
-
-    return {
-      ...item,
-      horasEjecutadas: limitedHorasEjecutadas,
-    };
-  });
-
-
-  // 2. Preparar datos para la gráfica de resumen total 
-  const totalEjecutado = dataWithLimit.reduce((sum, item) => sum + item.horasEjecutadas, 0);
-  const totalProyectado = dataWithLimit.reduce((sum, item) => sum + item.horasProyectadas, 0);
+  const totalEjecutado = monthlyData.reduce((sum, i) => sum + (i.horasEjecutadas || 0), 0);
+  const totalProyectado = monthlyData.reduce((sum, i) => sum + (i.horasProyectadas || 0), 0);
   const totalDiferencia = totalEjecutado - totalProyectado;
 
-  const summaryData = [{
-    name: 'Diferencia Total (Hrs)',
-    diferencia: parseFloat(totalDiferencia.toFixed(1)),
-  }];
-  
-  // Calcular el color de la tarjeta y la barra resumen
-  let cardColor = 'rgba(255, 205, 86, 0.2)'; // Amarillo (neutral)
-  if (showOtrasHorasWarning) {
-      cardColor = 'rgba(255, 0, 0, 0.2)'; // Rojo (Advertencia de OTRAS HORAS en Contrato)
-  } else if (totalDiferencia < -10) {
-      cardColor = 'rgba(255, 99, 132, 0.2)'; // Rojo claro (Baja ejecución)
-  } else if (totalDiferencia > 10) {
-      cardColor = 'rgba(75, 192, 192, 0.2)'; // Verde claro (Alta ejecución)
-  }
-  
-  const barColor = totalDiferencia < 0 ? COLORS[2] : COLORS[3]; // ROJO o VERDE oscuro
-
-  // 🚨 AJUSTE DE ETIQUETA: Refleja la nueva fuente de datos.
-  const totalProyectadoLabel = tipoContrato === 'Planta' 
-    ? '' 
-    : '8.0h * Días Hábiles';
-
+  const summaryData = [{ name: 'Diferencia Total (Hrs)', diferencia: totalDiferencia }];
+  const barColor = totalDiferencia < 0 ? COLORS[2] : COLORS[3];
+  const totalProyectadoLabel = 'Horas Esperadas';
 
   return (
-    <div 
-      style={{ 
-       width:1200
-      }}
-    >
+    <div style={{ width: 1200, borderRadius: 8, padding: 12, marginBottom: 16 }}>
       <h3>
-        👤 {instructorName} ({tipoContrato}) 
-        {showOtrasHorasWarning && (
-            <span style={{ color: 'red', marginLeft: '15px', fontSize: '0.8em', fontWeight: 'bold' }}>
-                ⚠️ OTRAS HORAS detectadas (Contrato)
-            </span>
-        )}
+        👤 {instructorName} 
+        {showOtrasHorasWarning && <span style={{ color: 'red', marginLeft: 10, fontWeight: 'bold' }}>⚠️ OTRAS HORAS detectadas</span>}
       </h3>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', fontWeight: 'bold' }}>
-        <span>
-            Proyectado : {totalProyectado.toFixed(1)} hrs
-        </span>
-        <span>
-            Ejecutado{tipoContrato === 'Contrato' && ' '}: {totalEjecutado.toFixed(1)} hrs
-        </span>
-        <span style={{ color: totalDiferencia < 0 ? 'red' : 'green' }}>Diferencia: {totalDiferencia.toFixed(1)} hrs</span>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20, fontWeight: 'bold' }}>
+        <span>Proyectado ({totalProyectadoLabel}): {formatNumberWithSeparators(totalProyectado)} hrs</span>
+        <span>Ejecutado: {formatNumberWithSeparators(totalEjecutado)} hrs</span>
+        <span style={{ color: totalDiferencia < 0 ? 'red' : 'green' }}>Diferencia: {formatNumberWithSeparators(totalDiferencia)} hrs</span>
       </div>
 
-      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-        
-        {/* Gráfica Mensual (Barras) - Comparación Proyectado vs Ejecutado */}
-        <div style={{ flexBasis: '65%', width:1200, height: '350px' }}> 
-
-          <ResponsiveContainer  height="100%">
-            <BarChart data={dataWithLimit} margin={{ top: 5, right: 30, left: 20, bottom: 50 }}>
+      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+        {/* Gráfica Mensual */}
+        <div style={{ flexBasis: '65%', width: 1200, height: 350 }}>
+          <ResponsiveContainer height="100%">
+            <BarChart data={monthlyData} margin={{ top: 5, right: 30, left: 20, bottom: 50 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="MES" 
-                angle={0} 
-                textAnchor="middle" 
-                interval={0} 
-                height={50} 
-                style={{ fontSize: '0.6em' }} 
-              />
+              <XAxis dataKey="MES" height={50} style={{ fontSize: '0.7em' }} />
               <YAxis />
-              <Tooltip formatter={(value) => [`${value.toFixed(1)} hrs`]} />
+              <Tooltip formatter={(v) => [`${formatNumberWithSeparators(v)} hrs`]} />
               <Legend />
               <Bar dataKey="horasProyectadas" fill={COLORS[0]} name="Proyectado" />
-              <Bar 
-                dataKey="horasEjecutadas" 
-                fill={COLORS[1]} 
-                name={`Ejecutado${tipoContrato === 'Contrato' ? ' ' : ''}`} 
-              />
+              <Bar dataKey="horasEjecutadas" fill={COLORS[1]} name="Ejecutado" />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Gráfica de Resumen (Barra Única) */}
-        <div style={{ flexBasis: '30%', minWidth: '250px', height: '350px' }}> 
+        {/* Gráfica Resumen */}
+        <div style={{ flexBasis: '30%', minWidth: 250, height: 350 }}>
           <h4>Diferencia Total</h4>
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={summaryData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <BarChart data={summaryData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" interval={0} style={{ fontSize: '0.9em' }} /> 
-              <YAxis /> 
-              <Tooltip formatter={(value) => [`${value.toFixed(1)} hrs`]} />
-              <Legend payload={[{ value: `Diferencia: ${totalDiferencia.toFixed(1)} hrs`, type: 'square', color: barColor }]} />
-              <Bar dataKey="diferencia" fill={barColor} name="Diferencia Total" />
+              <XAxis dataKey="name" style={{ fontSize: '0.9em' }} />
+              <YAxis />
+              <Tooltip formatter={(v) => [`${formatNumberWithSeparators(v)} hrs`]} />
+              <Legend payload={[{ value: `Diferencia: ${formatNumberWithSeparators(totalDiferencia)} hrs`, type: 'square', color: barColor }]} />
+              <Bar dataKey="diferencia" fill={barColor} />
             </BarChart>
           </ResponsiveContainer>
         </div>
